@@ -1,3 +1,5 @@
+const _ = require('lodash');
+
 class Users {
   constructor () {
     this.users = []
@@ -21,11 +23,15 @@ class Users {
     if (removeUser) {
       this.users = this.users.filter((user)=> user.id !== id);
       return removeUser;
-    } 
+    }
   }
 
   getUser(id){
     return this.users.filter((user)=> user.id === id)[0];
+  }
+
+  getRooms(){
+    return _.uniq(this.users.map((user) => user.room));
   }
 }
 

@@ -1,5 +1,6 @@
 const expect = require('expect');
 
+
 const {Users} = require('./users');
 
 
@@ -128,4 +129,20 @@ describe('Users', () => {
       expect(foundUser).toBeFalsy();
     });
   });
+
+  describe('Users.getRooms()', () => {
+
+    beforeEach(() => {
+      populateSeedUsers();
+    });
+
+    it('should return a list of the room names', () => {
+      expect(seedUsers.getRooms()).toEqual(['testRoomOne','testRoomTwo']);
+    })
+
+    it('should return an empty array when there are no rooms regsistered', () => {
+      var users = new Users();
+      expect(users.getRooms()).toEqual([]);
+    })
+  })
 });
