@@ -19,8 +19,8 @@ var users = new Users();
 app.use(express.static(publicPath));
 
 io.on('connection', (socket) => {
-  console.log('New User Connected');
 
+  socket.emit('updateRooms', users.getRooms());
 
   socket.on('join', (params, callback) => {
     if (!isRealString(params.name)||!isRealString(params.room)) {
@@ -32,33 +32,33 @@ io.on('connection', (socket) => {
     users.removeUser(socket.id);//just in case
     users.addUser(socket.id, params.name, params.room);
 
+    socket.emit('updateRooms', users.getRooms());
+    
     io.to(params.room).emit('updateUsersList', users.getUserList(params.room));
 
     socket.emit('newMessage', generateMessage('Admin','Welcome to the Chat App'));
-    socket.broadcast.to(params.room).emit('newMessage',generateMessage('Admin', `${params.name} has Joined`));
+    socket.broadcast.to(params.room).emit('newMessage',
+      generateMessage('Admin', `${params.name} has Joined`));
 
     callback();
   })
 
   socket.on('disconnect', () => {
-    console.log('Disconnected from server');
-
     var user = users.removeUser(socket.id);
 
     if (user) {
       io.to(user.room).emit('updateUsersList', users.getUserList(user.room))
-      io.to(user.room).emit('newMessage', generateMessage('Admin', `${user.name} has left the room!`));
+      io.to(user.room).emit('newMessage',
+        generateMessage('Admin', `${user.name} has left the room!`));
     }
   })
 
   socket.on('createMessage', (message,callback) => {
-    console.log('create message:', message);
     var user = users.getUser(socket.id);
 
     if(user && isRealString(message.text)){
       io.to(user.room).emit('newMessage', generateMessage(user.name,message.text));
     }
-
     callback();
   })
 
@@ -66,11 +66,10 @@ io.on('connection', (socket) => {
     var user = users.getUser(socket.id);
 
     if(user){
-      io.to(user.room).emit('newLocationMessage', generateLocationMessage(user.name, coords.latitude, coords.longitude));
+      io.to(user.room).emit('newLocationMessage',
+        generateLocationMessage(user.name, coords.latitude, coords.longitude));
     }
-
-
-  })
+  });
 });
 
 
